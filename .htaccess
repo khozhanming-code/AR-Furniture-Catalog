@@ -1,0 +1,52 @@
+# Root .htaccess - AR Furniture Catalog
+
+Options -Indexes
+DirectoryIndex index.php
+
+# 3D / AR MIME types
+<IfModule mod_mime.c>
+    AddType model/gltf-binary .glb
+    AddType model/gltf+json .gltf
+    AddType model/vnd.usdz+zip .usdz
+</IfModule>
+
+# Allow model files to load across origins
+<IfModule mod_headers.c>
+    <FilesMatch "\.(glb|gltf|usdz)$">
+        Header set Access-Control-Allow-Origin "*"
+    </FilesMatch>
+</IfModule>
+
+# Redirect public hosting to HTTPS; allow local XAMPP and private LAN
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTP_HOST} !^localhost(:[0-9]+)?$ [NC]
+    RewriteCond %{HTTP_HOST} !^127\.0\.0\.1(:[0-9]+)?$ [NC]
+    RewriteCond %{HTTP_HOST} !^192\.168\.[0-9]+\.[0-9]+(:[0-9]+)?$ [NC]
+    RewriteCond %{HTTP_HOST} !^10\.[0-9]+\.[0-9]+\.[0-9]+(:[0-9]+)?$ [NC]
+    RewriteCond %{HTTP_HOST} !^172\.(1[6-9]|2[0-9]|3[01])\.[0-9]+\.[0-9]+(:[0-9]+)?$ [NC]
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# Protect sensitive files
+<FilesMatch "\.(sql|md|log|ini)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Protect .env and .env.example
+<FilesMatch "^\.env(\..*)?$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
